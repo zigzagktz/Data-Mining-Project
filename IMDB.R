@@ -36,3 +36,18 @@ for (i in 1:3){
 colSums(is.na(df))
 
 boxplot(df$gross)
+
+
+hist(df$num_critic_for_reviews,breaks = 100)
+
+hist(df$duration,breaks=100,xlim=c(50,200))
+
+
+df$duration[which(is.na(df$duration))] <- mean(df$duration,na.rm=T)
+
+a <- strsplit(genres,"|",fixed=T)
+b <- unlist(a)
+table(b)
+
+summary(df$director_facebook_likes)
+summary(df$title_year)
