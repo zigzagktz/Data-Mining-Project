@@ -137,11 +137,85 @@ expensive_df <- df1[(df1$budget>200 & df1$budget!=12215.5 & !(is.na(df1$budget))
 table(expensive_df$aspect_ratio) 
 ## we already knew that most of the movies are already in either 2.35 or 1.85 ration
 ## so no significance of screen ration on budegt of movie
-
 ## budget vs aspect ratio (no siginificance)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## now countries vs the imdb
+## lets first convert countries into factor
+summary(df1$country)
+temp <- c("India", "USA","UK","Spain","Australia",
+          "China","Canada","France","Germany","Italy","Japan","other")
+df1$country <- factor(df1$country)
+levels(df1$country)[!(levels(df1$country) %in% temp) ] <- "other"
+table(df1$country)
 
 
 
-
+score <- df1$imdb_score
+  score[(score < 1.5) & (score > 0.5)] <- 1
+  score[(score <= 2.5) & (score > 1.5)] <- 2
+  score[(score <= 3.5) & (score > 2.5)] <- 3
+  score[(score <= 4.5) & (score > 3.5)] <- 4
+  score[(score <= 5.5) & (score > 4.5)] <- 5
+  score[(score <= 6.5) & (score > 5.5)] <- 6
+  score[(score <= 7.5) & (score > 6.5)] <- 7
+  score[(score <= 8.5) & (score > 7.5)] <- 8
+  score[(score <= 9.5) & (score > 8.5)] <- 9
+  score[(score <= 10)  &  (score > 9.5)] <- 10
+  
+  ggplot(df1,aes(x=country,fill=factor(imdb_score_cat))) + geom_histogram(stat = "count")
+  ## no country bias 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+#year release of movie having 0 facebook likes
+  dd <- df1 %>% select(title_year)  %>% filter(df1$movie_facebook_likes==0)
+  hist(dd$title_year,breaks=200)
+##i see that even older movies does not have zero likes
+##movies with zero likes are from 1980 to till date
+  
+## lets check older movies and their facebook likes
+  ttyy <- df1 %>% select(title_year,movie_facebook_likes)
+  cat <- seq(1910,2020,10)
+  ttyy["cat_year"] <- ttyy$title_year  #copy to new column
+  
+  ttyy$cat_year[ttyy$cat_year <=1920] <- 1920
+  ttyy$cat_year[ttyy$cat_year <=1930 & ttyy$cat_year >1920] <- 1930
+  ttyy$cat_year[ttyy$cat_year <=1940 & ttyy$cat_year >1930] <- 1940
+  ttyy$cat_year[ttyy$cat_year <=1950 & ttyy$cat_year >1940] <- 1950
+  ttyy$cat_year[ttyy$cat_year <=1960 & ttyy$cat_year >1950] <- 1960
+  ttyy$cat_year[ttyy$cat_year <=1970 & ttyy$cat_year >1960] <- 1970
+  ttyy$cat_year[ttyy$cat_year <=1980 & ttyy$cat_year >1970] <- 1980
+  ttyy$cat_year[ttyy$cat_year <=1990 & ttyy$cat_year >1980] <- 1990
+  ttyy$cat_year[ttyy$cat_year <=2000 & ttyy$cat_year >1990] <- 2000
+  ttyy$cat_year[ttyy$cat_year <=2010 & ttyy$cat_year >2000] <- 2010
+  ttyy$cat_year[ttyy$cat_year <=2020 & ttyy$cat_year >2010] <- 2020
+  
+  jj <- ttyy%>% group_by(cat_year) %>% summarise(value=sum(movie_facebook_likes))
+  ggplot(jj,aes(x=cat_year,y=log(value))) + geom_point() + theme_bw()
+  
+# facebook likes gradully increasing depend upon time, 
+# eventhough most of the movies with zero likes are newer
+  
+  
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  summary(df1$f)
+ ## calculate profit and classify if a movei is a success or a failure 
+  
+## number of critique, number votes, number reviews versus imdb  
+  install.packages("corrplot")
+  library(corrplot)
+  ss <- df1$director_facebook_likes 
+   dd <- df1$num_critic_for_reviews
+   ff <- df1$num_user_for_reviews
+   numb <- cbind(ss,dd,ff)
+   ss <- df1$num_voted_users
+   numb <- cbind(ss,dd,ff,df1$imdb_score)
+   numb <- as.data.frame(numb)
+   colnames(numb)<- c("count_votes","count_critics","count_reviews","IMDB rating")
+   colSums(is.na(numb))
+   numb$count_reviews[which(is.na(numb$count_reviews))] <- mean(numb$count_reviews,na.rm=TRUE)
+   correlation <- cor(numb,method="s")
+   corrplot(correlation,method="pie")
+## imdb does not seems to have strong corealtion with these three attribtes
+## number of reviews for a movie have high corelation with nummber of votes it gets
