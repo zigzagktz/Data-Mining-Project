@@ -17,7 +17,7 @@ likes <- as.data.frame(likes)
 t <- likes[which(is.na(likes$fb_likes_actor_3)),]
 colSums(is.na(t))
 
-#most of them are documentary that does not have actor facebook likes
+#most of them are documentaries that does not have 3rd actor facebook likes
 x <- likes_test$genres
 length(grep("Documentary",x))*100/23
 
@@ -219,3 +219,30 @@ score <- df1$imdb_score
    corrplot(correlation,method="pie")
 ## imdb does not seems to have strong corealtion with these three attribtes
 ## number of reviews for a movie have high corelation with nummber of votes it gets
+   
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ## number of faces
+   barplot(df1$facenumber_in_poster)
+    ## two outliers, lets delete them
+   head(df1$facenumber_in_poster[order(df1$facenumber_in_poster,decreasing=TRUE)],3)
+   t <- head(order(df1$facenumber_in_poster,decreasing=TRUE),2)
+   df1$facenumber_in_poster[t] <- mean(df1$facenumber_in_poster)
+   ggplot(df1,aes(x=facenumber_in_poster,fill=factor(imdb_score_cat))) + geom_histogram(stat="count")
+   ## the imdb ratings spreads evenly for each type of facenumber in poster
+   
+   
+ #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #lets check how many genres of each category do we have
+   genres <- as.character(df1$genres)
+    gen <- strsplit(genres,"|",fixed=TRUE)   
+      gen <- unlist(gen)    
+          table(gen)    
+    #most movies are comedy, second most is action
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+    # conert gross from dollar to million
+    df1$gross <- df1$gross/1000000
+    hist(df1$gross)    
+    #impute median as missing value in gross value
+    df1$gross[which(is.na(df1$gross))] <- median(df1$gross,na.rm=TRUE)
+    plot(df1$gross) # not very big outliers
+    
