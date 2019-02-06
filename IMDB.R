@@ -1,3 +1,8 @@
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(corrplot)
+
 setwd("C:/Users/ksiro/Desktop/data mining/week 3")
 df <- read.csv("metadata.csv",sep=";",header=T)
 head(df)
@@ -163,6 +168,8 @@ score <- df1$imdb_score
   score[(score <= 8.5) & (score > 7.5)] <- 8
   score[(score <= 9.5) & (score > 8.5)] <- 9
   score[(score <= 10)  &  (score > 9.5)] <- 10
+  
+  df1["imdb_score_cat"] <- score
   
   ggplot(df1,aes(x=country,fill=factor(imdb_score_cat))) + geom_histogram(stat = "count")
   ## no country bias 
