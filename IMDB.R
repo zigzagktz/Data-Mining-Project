@@ -4,9 +4,6 @@ library(stringr)
 library(corrplot)
 
 setwd("C:/Users/ksiro/Desktop/data mining/week 3")
-df <- read.csv("metadata.csv",sep=";",header=T)
-head(df)
-View(df)
 df <- read.csv("metadata.csv",sep=",",header=T)
 head(df)
 summary(df)
@@ -21,6 +18,8 @@ summary(likes)
 likes <- as.data.frame(likes)
 t <- likes[which(is.na(likes$fb_likes_actor_3)),]
 colSums(is.na(t))
+
+likes_test <- df[which(is.na(likes$fb_likes_actor_3)),]
 
 #most of them are documentaries that does not have 3rd actor facebook likes
 x <- likes_test$genres
@@ -122,12 +121,15 @@ ggplot(df1,aes(x=imdb_score,fill=factor(aspect_ratio)))+ geom_histogram(stat="co
 ##convert money into millions
 df1$budget <- df1$budget/1000000
 options(scipen=999)## discables scientific notation
+df1$budget[which(is.na(df1$budget))]  <- mean(df1$budget,na.rm=TRUE) #IMPUTING NAs
 
 boxplot(df1$budget)
 budget <- df1$budget
 budget[head(order(df1$budget,decreasing=TRUE),1)]
 budget <- budget[head(-(order(budget,decreasing = TRUE)),1)]
 boxplot(budget)
+
+
 
 ## take top 50 expensive movie
 expensive <- budget[head(order(budget,decreasing=TRUE),400)]
@@ -210,7 +212,6 @@ score <- df1$imdb_score
  ## calculate profit and classify if a movei is a success or a failure 
   
 ## number of critique, number votes, number reviews versus imdb  
-  install.packages("corrplot")
   library(corrplot)
   ss <- df1$director_facebook_likes 
    dd <- df1$num_critic_for_reviews
@@ -248,8 +249,51 @@ score <- df1$imdb_score
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
     # conert gross from dollar to million
     df1$gross <- df1$gross/1000000
-    hist(df1$gross)    
+    plot(df1$gross)   
     #impute median as missing value in gross value
     df1$gross[which(is.na(df1$gross))] <- median(df1$gross,na.rm=TRUE)
-    plot(df1$gross) # not very big outliers
+    g<- ggplot(df1,aes(y=df1$gross,x=seq(1,nrow(df1))))+ geom_point() # not very big outliers
+    g + facet_wrap(~df1$imdb_score_cat) + stat_smooth(method="lm")
+    ## line keeps become steeper from 5-to-9
+    ## which means as the rating would the average number of movies in that rating is also increases
+    c <- cor(df1$imdb_score_cat,df1$gross)
+    c
+    ## however rating itself has very week corealtion with imdb rating
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+    #remove the whole coulmn that has single outlier in budget
+    df1<- df1[-which.max(df$budget),]
+    #also remove from likes and numb dataframe
+    likes <- likes[-which.max(df$budget),]
+    numb<- numb[-which.max(df$budget),]
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       
+    plot(df1$director_facebook_likes) 
+    abline(h=10000,col="red")
+    ## see a distinction between director likes above and below 10000 
+    ## let' see what makes them differ
+    
+    index <- which(df1$director_facebook_likes >10000)
+    tenthou <- df1[index,]    
+    tennot <- df1[-index,]    
+    par(mfrow=c(1,2))    
+    ## unable to find distinction for now
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       
+    ## density plot of imdb based on content rated
+    temp1 <- c("Approved","G","Not Rated","PG","PG-13","R","Unrated")
+    levels(df1$content_rating)[!(levels(df1$content_rating)%in%temp1)]<-"other"        
+    levels(df1$content_rating)
+    f <- ggplot(df1,aes(imdb_score_cat,color=content_rating,fill=content_rating))
+    f + geom_density(alpha=0.5)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       
+  #text analysis
+   # install.packages("tm")
+    library(tm)
+    keywords <- as.character(df1$plot_keywords)
+    keywords <- gsub("|"," ",keywords,fixed=TRUE)
+    txt <- Corpus(VectorSource(keywords))
+    txt <- tm_map(txt,tolower)
+    txt <- tm_map(txt, stripWhitespace)    
+    txt <- tm_map(txt,removeWords,stopwords("en"))    
+    dtm <- DocumentTermMatrix(txt)    
+    dtm <- as.matrix(dtm)    
     
