@@ -296,4 +296,6 @@ score <- df1$imdb_score
     txt <- tm_map(txt,removeWords,stopwords("en"))    
     dtm <- DocumentTermMatrix(txt)    
     dtm <- as.matrix(dtm)    
+    cs <- colSums(dtm)
+    which.max(cs)
     
