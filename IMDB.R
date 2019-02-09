@@ -160,7 +160,7 @@ table(df1$country)
 
 
 score <- df1$imdb_score
-  score[(score < 1.5) & (score > 0.5)] <- 1
+  score[(score <= 1.6) & (score > 0.5)] <- 1
   score[(score <= 2.5) & (score > 1.5)] <- 2
   score[(score <= 3.5) & (score > 2.5)] <- 3
   score[(score <= 4.5) & (score > 3.5)] <- 4
@@ -288,6 +288,7 @@ score <- df1$imdb_score
   #text analysis
    # install.packages("tm")
     library(tm)
+    library(class)
     keywords <- as.character(df1$plot_keywords)
     keywords <- gsub("|"," ",keywords,fixed=TRUE)
     txt <- Corpus(VectorSource(keywords))
@@ -298,4 +299,31 @@ score <- df1$imdb_score
     dtm <- as.matrix(dtm)    
     cs <- colSums(dtm)
     which.max(cs)
+    dtm <- as.data.frame(dtm)
     
+    classes <- df1$imdb_score_cat
+    classes <- ifelse(classes<=7,"7_or_lower","8_or_9")
+  
+    
+    combined <- cbind(dtm,classes)  
+    combined <- as.data.frame(combined)
+   
+    set.seed(123)
+    combined$classes <- as.character(combined$classes)
+    ran <- sample(nrow(combined),.9*nrow(combined))
+    dtm.train <- combined[ran,]
+    dtm.test <- combined[-ran,]
+    
+    dtm.train.value <- dtm.train[,1:(ncol(dtm.train)-1)]
+    dtm.test.value <- dtm.test[,1:(ncol(dtm.test)-1)]
+    
+    a <- dtm.train.value
+    b<- dtm.test.value
+    c <- dtm.train$classes
+    
+    res <- knn(a,b,c)
+    t <- table(res,dtm.test$classes)
+    t
+    (sum(diag(t))/sum(t))*100
+    
+  

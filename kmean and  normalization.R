@@ -1,16 +1,16 @@
-cl <- cbind(likes,numb,df1$duration,df1$gross,df1$budget,df1$imdb_score_cat )
-
-sub <- cl[1:200,]
-sub <- as.data.frame(sub[,-c(7,11)])
+cl <- cbind(df1$imdb_score_cat,df1$imdb_score_cat )
+cl<-as.data.frame(cl)
+cl$V2 <- as.factor(cl$V2)
 
 normalize <- function(x){
   
   (x-min(x))/(max(x)-min(x))
 }
 
-sub <- as.data.frame(apply(sub, 2, normalize))
+sub <- as.data.frame(apply(cl, 2, normalize))
 
-distance <- dist(sub)
-hc <- hclust(distance)
 
 k <- kmeans(sub,8)
+
+t <- table(k$cluster,cl$V2)
+sum(diag(t))/sum(t)
