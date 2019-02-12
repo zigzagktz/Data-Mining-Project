@@ -51,7 +51,7 @@ which(is.na(likes))
 
 par(mfrow=c(1,3))
 for (i in 1:3){
-  boxplot(likes[,i])
+  boxplot(log(likes[,i]))
 }
 
 ## removing likes and nams columns from data frame
@@ -72,12 +72,16 @@ hist(df$duration,breaks=100,xlim=c(50,200))
 
 df$duration[which(is.na(df$duration))] <- mean(df$duration,na.rm=T)
 
-a <- strsplit(genres,"|",fixed=T)
+df$genres <- as.character(df$genres)
+a <- strsplit(df$genres,"|",fixed=T)
 b <- unlist(a)
 table(b)
+#generes' table
 
 summary(df$director_facebook_likes)
 summary(df$title_year)
+
+
 
 ##removing an empty level from color
 df$color <- as.character(df$color)
@@ -85,7 +89,7 @@ df$color[which(df$color=="")] <- "Color"
 
 ## all "director facebook likes" (104) missing values are within gross missing values (884)
 ## same goes with "movie title" (105) in test and (108) in df
-test <- df[which(is.na(df$gross)),]
+test <- df[which(is.na(df$director_facebook_likes)),]
 summary(test)[,5]
 summary(df)[,5]
 # missing gross, missing title, missing director facebook likes
@@ -133,7 +137,7 @@ boxplot(budget)
 
 ## take top 50 expensive movie
 expensive <- budget[head(order(budget,decreasing=TRUE),400)]
-barplot(expensive)
+barplot(expensive,xlim = c(1,200))
 ## looking at the plot we see that there are only a few movies that were extremenly expensive
 ## let's extract top values out and analyse them
 expensive[order(expensive,decreasing=TRUE)] 
