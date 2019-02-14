@@ -109,8 +109,14 @@ df<- df[,-1]
   
   #screen ratio vs imdb
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ggplot(df,aes(x=imdb_score,fill=factor(aspect_ratio)))+ geom_histogram(stat="count")
-  #we can remove the aspect ration now
+  g <- ggplot(df,aes(x=imdb_score,fill=factor(aspect_ratio)))+ 
+    g <- g+geom_histogram(stat="count") + 
+     g <- g+ggtitle("Aspect Ratio Vs Imdb score") + 
+      g <- g+theme(legend.key.size =  unit(0.1, "in")) +
+        g <- g+scale_fill_discrete(name = "Aspect Ratio") + 
+          g <- g+theme(axis.text.x = element_text(angle = 90)) + 
+           g <- g+ xlab("IMDB Ratings") + ylab("Count of Movies")
+    #we can remove the aspect ration now
   df <- df[,!(colnames(df) %in% c("aspect_ratio"))]
   
   
@@ -235,6 +241,20 @@ df<- df[,-1]
   
   
   # remove director facebook likes and movie facebook likes becuase of uncertainity
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       
+ par(mfrow=c(1,2))
+   plot(df$director_facebook_likes,ylab="Director Facebook Likes",xlab="Count") 
+  abline(h=10000,col="red")
+  plot(log(df$movie_facebook_likes),ylab="Movie Facebook Likes",xlab="Movie Count") 
+  abline(h=8.9,col="red")
+  abline(h=7.12,col="red")
+  
+  del <- c("director_facebook_likes","movie_facebook_likes")  
+  df <- df[,!(colnames(df) %in% del)]
+  ## see a distinction between director likes above and below 10000 
+  ## let' see what makes them differ
+  
+  
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       
   #text analysis
