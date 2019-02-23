@@ -1,7 +1,3 @@
-getwd()
-# setwd("~/Data Mining Appns ALY 6040")
-# getwd()
-
 library(ggplot2)
 library(dplyr)
 library(stringr)
@@ -174,7 +170,7 @@ df<- df[,-1]
   gg <- ggplot(df,aes(x=country,fill=factor(imdb_score_cat))) 
   gg <- gg + geom_histogram(stat = "count") 
   gg <- gg +theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-  gg <- gg + scale_fill_discrete(name = "IMDB Score Category")
+  gg <- gg + scale_fill_discrete(name = "Aspect Ratio")
   gg <- gg + ggtitle("Movies by country")
   gg
   ##after carefully analysing the data, we realised that india & japan does not have bdget values
@@ -318,8 +314,6 @@ df<- df[,-1]
   res <- knn(a,b,c)
   t <- table(res,dtm.test$classes)
   t
-  
-  #Calculate Accuracy of predition
   (sum(diag(t))/sum(t))*100
   
      #text analysis ends
@@ -335,9 +329,21 @@ df<- df[,-1]
   test <- df1[-row.number, ]
   
   
-
+  #Linear model
   
-  #Random Forest of IMDB Score:
+  fit <- lm(imdb_score ~ num_critic_for_reviews+duration+gross+num_voted_users
+            +cast_total_facebook_likes+num_user_for_reviews,
+            data = train)
+  
+  summary(fit)    #R-sq: 0.27
+  
+  # num <- cbind(dta1$imdb_score, dta1$num_critic_for_reviews, dta1$duration, dta1$gross
+  #              , dta1$num_voted_users, dta1$cast_total_facebook_likes
+  #              , dta1$num_user_for_reviews, dta1$budget, dta1$movie_facebook_likes)
+  # corMatrix <- cor(num)
+  # corrplot(corMatrix)
+  
+  #Random Forest:
   
   df1$binned_score <- cut(df1$imdb_score, breaks = c(0,4,6,8,10))
   train$binned_score <- cut(train$imdb_score, breaks = c(0,4,8,10))
@@ -381,9 +387,8 @@ df<- df[,-1]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  # Random Forest to predict Log(Gross sales)
   
-  # Some variables that span between single digits and millions:  make them (log() + .1)---  log (0) = NAN
+  # Variables that span between single digits and millions:  make them (log() + .1)---  log (0) = NAN
  par(mfrow=c(2,3))
    df1$logGross<-log(df1$gross + .1)
   hist(df1$logGross,main="Log Gross",xlab="Gross")
@@ -409,10 +414,10 @@ df<- df[,-1]
   colnames(numdf1)
   
   
-  # ________________________________________________________________________________________________________
   
   # Now try Random Forest for Log(Gross).   These values have been binned before the Train/Test split
-
+  # Now try Random Forest for Log(Gross).   These values have been binned before the Train/Test split
+  
   
   # Create Bins of movies by LogGross
   numdf1$binned_LogGross <- cut(numdf1$logGross, breaks = c(0,10,12,14,16,18,20))
@@ -442,8 +447,6 @@ df<- df[,-1]
   numdf4 <- subset(numdf4, select = -c(duration))
   numdf4 <- subset(numdf4, select = -c(actor_1_facebook_likes))
   numdf4 <- subset(numdf4, select = -c(cast_total_facebook_likes))
-  numdf4 <- subset(numdf4, select = -c(imdb_score_cat))
-  numdf4 <- subset(numdf4, select = -c(profit))
   
   
   
@@ -551,9 +554,6 @@ df<- df[,-1]
   numdf11 <- subset(numdf11, select = -c(facenumber_in_poster))
   colnames(numdf11)
   
-  # Go back to displaying one graph
-  par(mfrow=c(1,1))
-  
   # Now create simplified correlation matrix
   cor_mat <- cor(numdf11)
   cor_mat
@@ -633,7 +633,6 @@ df<- df[,-1]
   # duration
   # imdb_score
   
-  df1<- df
   
   hist(df1$num_critic_for_reviews)
   hist(df1$num_user_for_reviews)
@@ -650,8 +649,7 @@ df<- df[,-1]
   #  df1$imdb_score_cat <- as.numeric(df1$imdb_score_cat)
   #  hist(df1$imdb_score_cat)      Don't know why these two don't work
   
-  # Some variable span between single digits and millions:  make them (log() + .1)---  
-  # We add 0.1 because it avoids the log (0) = NAN, if the data value = 0
+  # Variables that span between single digits and millions:  make them (log() + .1)---  log (0) = NAN
   df1$logGross<-log(df1$gross + .1)
   hist(df1$logGross)
   
@@ -702,13 +700,9 @@ df<- df[,-1]
   #     actor_1_facebook_likes 
   #     num_critic_for_reviews 
   
-  numdf1 <- subset(numdf1, select = -c(logGross))
-  numdf1 <- subset(numdf1, select = -c(profit))
-  numdf1 <- subset(numdf1, select = -c(imdb_score_cat))
-  
-  
+  # numdf1 <- subset(numdf1, select = -c(logGross))
   model1 <-  lm(gross ~ ., data = numdf1)
-  summary(model1)            # R2  = 0.51
+  summary(model1)            # R2  = 0.61
   
   # Strongest predictors of Gross Sales are
   #     num_voted_users
@@ -725,7 +719,7 @@ df<- df[,-1]
   
   model3 <-  lm(imdb_score ~ ., data = numdf1)
   summary(model3)            
-  #  R2 = .37  without Log..... BUT R2 = .44 with Log values    BEST SO FAR for IMDB score
+  #  R2 = .40  without Log..... BUT R2 = .44 with Log values    BEST SO FAR for IMDB score
   # This is based on all numeric columns.   
   
   # Strongest predictors of IMDB score are
@@ -735,32 +729,10 @@ df<- df[,-1]
   #     num_critic_for_reviews 
   #     actor_1_facebook_likes 
   
-
-#_____________________________________________________________________________________________________________________  
- #  Linear Regression to predict log(Gross sales), and then IMDB score - used in our Presentation
- 
   
   
-   model1 <-  lm(gross ~ ., data = numdf1)
+  model1 <-  lm(logGross ~ ., data = numdf1)
   summary(model1)            # R2  = 0.50
-  
-  #Linear model to predict IMDB score
-  
-  fit <- lm(imdb_score ~ num_critic_for_reviews+duration+gross+num_voted_users
-            +cast_total_facebook_likes+num_user_for_reviews,
-            data = train)
-  
-  summary(fit)    #R-sq: 0.27
-  
-  # num <- cbind(dta1$imdb_score, dta1$num_critic_for_reviews, dta1$duration, dta1$gross
-  #              , dta1$num_voted_users, dta1$cast_total_facebook_likes
-  #              , dta1$num_user_for_reviews, dta1$budget, dta1$movie_facebook_likes)
-  # corMatrix <- cor(num)
-  # corrplot(corMatrix)
-  
-  
-  
-  # Other Models- just trying things.
   
   model1 <-  lm(gross ~ imdb_score, data = numdf1)
   summary(model1)            # R2  = 0.04
@@ -814,8 +786,6 @@ df<- df[,-1]
   
   model3 = lm(imdb_score ~ duration + logNum_voted_users + logBudget + title_year + num_critic_for_reviews + LogCast_total_facebook_likes, data = numdf1)
   summary(model3)            # R2 = .31
-  
-  numdf1$logGross <- log(numdf1$gross)
   
   model2 <- lm(logGross ~ logNum_user_for_reviews, data = numdf1)
   summary(model2)            #  R2 = .17
