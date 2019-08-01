@@ -1,6 +1,5 @@
 # Predictive-Modeling-for-IMDb-Movies
 
-![Slide1](https://user-images.githubusercontent.com/32847030/62309397-6f0f3c00-b455-11e9-9eb7-ccb1c191d7c8.JPG)
 ![Slide2](https://user-images.githubusercontent.com/32847030/62309398-6f0f3c00-b455-11e9-89ba-e0dc3c468041.JPG)
 ![Slide3](https://user-images.githubusercontent.com/32847030/62309399-6f0f3c00-b455-11e9-86a2-5683992e5ab4.JPG)
 ![Slide4](https://user-images.githubusercontent.com/32847030/62309413-70d8ff80-b455-11e9-84c2-c028bd898a44.JPG)
